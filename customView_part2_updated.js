@@ -341,7 +341,7 @@
       records.forEach(record => {
         const card = document.createElement('div');
         card.className = 'po-quote-card';
-        card.style.cssText = 'border: 1px solid #ddd; border-radius: 8px; padding: 16px; margin-bottom: 12px; background: white;';
+        card.className = 'po-quote-card';
         
         const quoteNumber = Utils.getFieldValue(record, CONFIG.FIELDS.QUOTE.NUMBER);
         const quoteName = Utils.getFieldValue(record, CONFIG.FIELDS.QUOTE.NAME);
@@ -351,11 +351,11 @@
         
         card.innerHTML = `
           <div class="po-quote-header">
-            <h4 class="po-quote-title" style="margin: 0 0 8px 0; font-size: 16px;">${Utils.escapeHtml(quoteNumber)} - ${Utils.escapeHtml(quoteName)}</h4>
+            <h4 class="po-quote-title">${Utils.escapeHtml(quoteNumber)} - ${Utils.escapeHtml(quoteName)}</h4>
           </div>
-          <div class="po-quote-body" style="margin-bottom: 12px;">
-            <p style="margin: 4px 0;">通貨: ${Utils.escapeHtml(currency)} | 有効期限: ${expiryDate || '無期限'}</p>
-            <p style="margin: 4px 0;">明細行数: ${itemsCount}行</p>
+          <div class="po-quote-body">
+            <p>通貨: ${Utils.escapeHtml(currency)} | 有効期限: ${expiryDate || '無期限'}</p>
+            <p>明細行数: ${itemsCount}行</p>
           </div>
           <div class="po-quote-footer">
             <button type="button" class="po-btn po-btn-primary btn-import-quote">この見積を取込</button>

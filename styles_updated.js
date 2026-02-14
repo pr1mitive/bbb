@@ -1,11 +1,12 @@
 /**
- * 発注管理システム - スタイル定義 (ERP連携対応版)
+ * 発注管理システム - スタイル定義 (完全版)
  * 
- * カスタマイズ一覧画面・案件配分モーダルのCSS
+ * カスタマイズ一覧画面・案件配分モーダル・見積参照のCSS
  * 
  * 【更新履歴】
  * 2026-02-14: 案件配分モーダル用スタイルを追加
  * 2026-02-14: addCustomCSS関数をグローバルに公開
+ * 2026-02-14: 見積カード・案件タグ等の不足CSSを追加
  */
 
 (function() {
@@ -624,6 +625,121 @@
       overflow-y: auto;
     }
     
+    .po-no-results {
+      text-align: center;
+      padding: 40px 20px;
+      color: #999;
+      font-size: 14px;
+    }
+    
+    /* 案件タグ */
+    .project-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+      margin-bottom: 5px;
+    }
+    
+    .po-tag {
+      display: inline-flex;
+      align-items: center;
+      padding: 3px 8px;
+      background-color: ${CONFIG.UI.COLORS.PRIMARY};
+      color: #fff;
+      font-size: 12px;
+      border-radius: 3px;
+      white-space: nowrap;
+    }
+    
+    .po-tag-remove {
+      margin-left: 5px;
+      padding: 0;
+      background: none;
+      border: none;
+      color: #fff;
+      font-size: 14px;
+      line-height: 1;
+      cursor: pointer;
+      opacity: 0.8;
+    }
+    
+    .po-tag-remove:hover {
+      opacity: 1;
+    }
+    
+    .po-checkbox-group {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    
+    .po-checkbox-label {
+      display: flex;
+      align-items: center;
+      padding: 10px;
+      border: 1px solid ${CONFIG.UI.COLORS.BORDER};
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+    
+    .po-checkbox-label:hover {
+      background-color: #f8f9fa;
+    }
+    
+    .po-checkbox {
+      margin-right: 10px;
+      cursor: pointer;
+    }
+    
+    /* 見積カード */
+    .po-quote-card {
+      border: 1px solid ${CONFIG.UI.COLORS.BORDER};
+      border-radius: 6px;
+      margin-bottom: 15px;
+      overflow: hidden;
+      transition: box-shadow 0.2s;
+      background: white;
+    }
+    
+    .po-quote-card:hover {
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    
+    .po-quote-header {
+      padding: 15px;
+      background-color: ${CONFIG.UI.COLORS.LIGHT};
+      border-bottom: 1px solid ${CONFIG.UI.COLORS.BORDER};
+    }
+    
+    .po-quote-title {
+      margin: 0;
+      font-size: 16px;
+      font-weight: 600;
+      color: ${CONFIG.UI.COLORS.DARK};
+    }
+    
+    .po-quote-body {
+      padding: 15px;
+    }
+    
+    .po-quote-body p {
+      margin: 0 0 8px 0;
+      font-size: 14px;
+      color: #666;
+    }
+    
+    .po-quote-body p:last-child {
+      margin-bottom: 0;
+    }
+    
+    .po-quote-footer {
+      padding: 15px;
+      background-color: #f8f9fa;
+      border-top: 1px solid ${CONFIG.UI.COLORS.BORDER};
+      text-align: right;
+    }
+    
     /* ユーティリティ */
     .po-text-muted {
       color: ${CONFIG.UI.COLORS.SECONDARY};
@@ -693,10 +809,8 @@
     document.head.appendChild(style);
     
     if (CONFIG.DEBUG) {
-      console.log('[スタイル] CSSを読み込みました (ERP連携対応版)');
+      console.log('[スタイル] CSSを読み込みました (完全版)');
     }
   };
-  
-  // 自動実行はしない（customView_part1.jsから呼ばれるため）
   
 })();
