@@ -5,6 +5,7 @@
  * 
  * 【更新履歴】
  * 2026-02-14: 案件配分モーダル用スタイルを追加
+ * 2026-02-14: addCustomCSS関数をグローバルに公開
  */
 
 (function() {
@@ -327,6 +328,11 @@
       min-height: 50px;
     }
     
+    .po-input-group-compact {
+      display: flex;
+      gap: 4px;
+    }
+    
     /* テーブル */
     .po-table {
       width: 100%;
@@ -543,6 +549,81 @@
       margin-top: 8px;
     }
     
+    /* モーダル系 */
+    .po-modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 10000;
+    }
+    
+    .po-modal-content {
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+      max-width: 600px;
+      width: 90%;
+      max-height: 80vh;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .po-modal-lg {
+      max-width: 900px;
+    }
+    
+    .po-modal-header {
+      padding: 16px 20px;
+      border-bottom: 1px solid ${CONFIG.UI.COLORS.BORDER};
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .po-modal-header h3 {
+      margin: 0;
+      font-size: 18px;
+      color: ${CONFIG.UI.COLORS.DARK};
+    }
+    
+    .po-modal-close {
+      background: none;
+      border: none;
+      font-size: 24px;
+      cursor: pointer;
+      color: ${CONFIG.UI.COLORS.SECONDARY};
+      padding: 0;
+      width: 30px;
+      height: 30px;
+      line-height: 1;
+    }
+    
+    .po-modal-close:hover {
+      color: ${CONFIG.UI.COLORS.DANGER};
+    }
+    
+    .po-modal-body {
+      padding: 20px;
+      overflow-y: auto;
+    }
+    
+    .po-search-box {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+    
+    .po-search-results {
+      max-height: 400px;
+      overflow-y: auto;
+    }
+    
     /* ユーティリティ */
     .po-text-muted {
       color: ${CONFIG.UI.COLORS.SECONDARY};
@@ -596,13 +677,26 @@
     }
   `;
   
-  // スタイルを挿入
-  const style = document.createElement('style');
-  style.textContent = css;
-  document.head.appendChild(style);
+  /**
+   * CSSをページに追加する関数
+   * customView_part1.jsから呼び出される
+   */
+  window.addCustomCSS = function() {
+    // 既に追加済みかチェック
+    if (document.getElementById('po-custom-styles')) {
+      return;
+    }
+    
+    const style = document.createElement('style');
+    style.id = 'po-custom-styles';
+    style.textContent = css;
+    document.head.appendChild(style);
+    
+    if (CONFIG.DEBUG) {
+      console.log('[スタイル] CSSを読み込みました (ERP連携対応版)');
+    }
+  };
   
-  if (CONFIG.DEBUG) {
-    console.log('[スタイル] CSSを読み込みました (ERP連携対応版)');
-  }
+  // 自動実行はしない（customView_part1.jsから呼ばれるため）
   
 })();
