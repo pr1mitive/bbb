@@ -1,10 +1,11 @@
 /**
- * 発注管理システム - カスタマイズ一覧画面(Part2) - ERP連携対応版
+ * 発注管理システム - 案件配分・見積参照機能統合版
  * 
- * 明細行操作、案件配分ボタン、モーダル表示、レコード登録処理
+ * 明細行操作、案件配分ボタン、見積参照、モーダル表示
  * 
  * 【更新履歴】
- * 2026-02-14: 案件配分ボタンを追加、既存の案件追加ボタンを統合
+ * 2026-02-14: 案件配分ボタンを追加
+ * 2026-02-14: 見積参照機能を追加
  */
 
 (function(window) {
@@ -280,6 +281,200 @@
     // 初期表示(全件)
     performSearch();
     searchInput.focus();
+  }
+  
+  /**
+   * 見積参照モーダルを開く
+   */
+  window.openQuoteModal = async function() {
+    const vendorCode = document.getElementById('vendor').value;
+    if (!vendorCode) {
+      Utils.showAlert(CONFIG.UI.MESSAGES.ERROR_NO_VENDOR, 'warning');
+      return;
+    }
+    
+    const modal = document.getElementById('modalQuoteRef');
+    if (!modal) {
+      Utils.error('見積参照モーダルが見つかりません');
+      return;
+    }
+    
+    modal.style.display = 'block';
+    
+    // 初期検索(発注先でフィルタ)
+    await searchQuotes(vendorCode);
+    
+    // 検索ボタンイベント
+    const searchBtn = document.getElementById('btnQuoteSearch');
+    if (searchBtn) {
+      searchBtn.onclick = async function() {
+        const query = document.getElementById('quoteSearchQuery').value;
+        await searchQuotes(vendorCode, query);
+      };
+    }
+  };
+  
+  /**
+   * 見積検索実行
+   * @param {string} vendorCode - 発注先コード
+   * @param {string} searchQuery - 検索クエリ
+   */
+  async function searchQuotes(vendorCode, searchQuery = '') {
+    try {
+      Utils.showLoading('見積検索中...');
+      
+      const records = await MasterData.searchQuotes(vendorCode, searchQuery);
+      const resultsDiv = document.getElementById('quoteSearchResults');
+      if (!resultsDiv) {
+        Utils.hideLoading();
+        return;
+      }
+      
+      resultsDiv.innerHTML = '';
+      
+      if (records.length === 0) {
+        resultsDiv.innerHTML = `<p class="po-text-muted">${CONFIG.UI.MESSAGES.ERROR_NO_RESULTS}</p>`;
+        Utils.hideLoading();
+        return;
+      }
+      
+      records.forEach(record => {
+        const card = document.createElement('div');
+        card.className = 'po-quote-card';
+        card.style.cssText = 'border: 1px solid #ddd; border-radius: 8px; padding: 16px; margin-bottom: 12px; background: white;';
+        
+        const quoteNumber = Utils.getFieldValue(record, CONFIG.FIELDS.QUOTE.NUMBER);
+        const quoteName = Utils.getFieldValue(record, CONFIG.FIELDS.QUOTE.NAME);
+        const currency = Utils.getFieldValue(record, CONFIG.FIELDS.QUOTE.CURRENCY);
+        const expiryDate = Utils.getFieldValue(record, CONFIG.FIELDS.QUOTE.EXPIRY_DATE);
+        const itemsCount = record[CONFIG.FIELDS.QUOTE.ITEMS]?.value?.length || 0;
+        
+        card.innerHTML = `
+          <div class="po-quote-header">
+            <h4 class="po-quote-title" style="margin: 0 0 8px 0; font-size: 16px;">${Utils.escapeHtml(quoteNumber)} - ${Utils.escapeHtml(quoteName)}</h4>
+          </div>
+          <div class="po-quote-body" style="margin-bottom: 12px;">
+            <p style="margin: 4px 0;">通貨: ${Utils.escapeHtml(currency)} | 有効期限: ${expiryDate || '無期限'}</p>
+            <p style="margin: 4px 0;">明細行数: ${itemsCount}行</p>
+          </div>
+          <div class="po-quote-footer">
+            <button type="button" class="po-btn po-btn-primary btn-import-quote">この見積を取込</button>
+          </div>
+        `;
+        
+        card.querySelector('.btn-import-quote').addEventListener('click', function() {
+          importQuoteItems(record);
+        });
+        
+        resultsDiv.appendChild(card);
+      });
+      
+      Utils.hideLoading();
+      
+    } catch (error) {
+      Utils.hideLoading();
+      Utils.error('見積検索エラー', error);
+      Utils.showAlert('見積検索に失敗しました', 'error');
+    }
+  }
+  
+  /**
+   * 見積明細を取込
+   * @param {Object} quoteRecord - 見積レコード
+   */
+  function importQuoteItems(quoteRecord) {
+    const tbody = document.getElementById('itemsBody');
+    const currentCount = tbody.children.length;
+    
+    // 既存明細がある場合は確認
+    if (currentCount > 0) {
+      const overwrite = Utils.confirm('既存の明細を上書きしますか?\n\n「OK」: 上書き\n「キャンセル」: 追加');
+      if (overwrite) {
+        tbody.innerHTML = '';
+        // 案件配分データもクリア
+        window.projectAllocations = {};
+      }
+    }
+    
+    // 見積明細を取込
+    const quoteItems = quoteRecord[CONFIG.FIELDS.QUOTE.ITEMS]?.value || [];
+    let importedCount = 0;
+    
+    quoteItems.forEach(item => {
+      const currentCount = document.querySelectorAll('#itemsBody tr').length;
+      if (currentCount >= CONFIG.MAX_ITEMS) {
+        return;
+      }
+      
+      const rowIndex = currentCount; // 0始まりのインデックス
+      const rowNo = currentCount + 1; // 表示用の行番号
+      
+      const row = document.createElement('tr');
+      row.id = `po-item-row-${rowIndex}`;
+      row.dataset.rowIndex = rowIndex;
+      row.dataset.rowNo = rowNo;
+      row.dataset.isInventory = CONFIG.INVENTORY_TYPES.NON_INVENTORY;
+      
+      const itemCode = Utils.getFieldValue(item.value, CONFIG.FIELDS.QUOTE_ITEM.ITEM_CODE);
+      const itemName = Utils.getFieldValue(item.value, CONFIG.FIELDS.QUOTE_ITEM.ITEM_NAME);
+      const itemDetail = Utils.getFieldValue(item.value, CONFIG.FIELDS.QUOTE_ITEM.ITEM_DETAIL);
+      const unitPrice = Utils.getFieldValue(item.value, CONFIG.FIELDS.QUOTE_ITEM.UNIT_PRICE);
+      const unit = Utils.getFieldValue(item.value, CONFIG.FIELDS.QUOTE_ITEM.UNIT);
+      
+      row.innerHTML = `
+        <td class="po-cell-center">${rowNo}</td>
+        <td>
+          <div class="po-input-group-compact">
+            <input type="text" class="po-input po-input-sm item-code item-code-input" value="${Utils.escapeHtml(itemCode)}">
+            <button type="button" class="po-btn po-btn-icon btn-search" title="アイテム検索">🔍</button>
+          </div>
+        </td>
+        <td><input type="text" class="po-input po-input-sm item-name" value="${Utils.escapeHtml(itemName)}" required></td>
+        <td><textarea class="po-textarea po-textarea-sm item-detail" rows="2">${Utils.escapeHtml(itemDetail)}</textarea></td>
+        <td><input type="number" class="po-input po-input-sm po-input-number unit-price" value="${unitPrice}" step="0.01" min="0" required></td>
+        <td><input type="number" class="po-input po-input-sm po-input-number quantity quantity-input" step="0.01" min="0" placeholder="0" required></td>
+        <td><input type="text" class="po-input po-input-sm unit" value="${Utils.escapeHtml(unit)}"></td>
+        <td class="po-cell-right amount" data-value="0">0.00</td>
+        <td>
+          <button type="button" class="po-btn po-btn-sm po-btn-secondary" 
+                  id="project-allocation-btn-${rowIndex}" 
+                  title="案件配分">
+            ${CONFIG.UI.BUTTON_TEXT.PROJECT_ALLOCATION}
+          </button>
+        </td>
+        <td class="po-cell-center">
+          <button type="button" class="po-btn po-btn-icon po-btn-danger btn-delete" title="削除">✕</button>
+        </td>
+      `;
+      
+      tbody.appendChild(row);
+      attachRowEventListeners(row, rowIndex);
+      importedCount++;
+    });
+    
+    // 通貨を見積と合わせる
+    const quoteCurrency = Utils.getFieldValue(quoteRecord, CONFIG.FIELDS.QUOTE.CURRENCY);
+    const currencySelect = document.getElementById('currency');
+    if (currencySelect) {
+      currencySelect.value = quoteCurrency;
+      currencySelect.dispatchEvent(new Event('change'));
+    }
+    
+    updateItemCount();
+    Calculator.calculateTotal();
+    
+    // モーダルを閉じる
+    const modal = document.getElementById('modalQuoteRef');
+    if (modal) {
+      modal.style.display = 'none';
+    }
+    
+    Utils.showAlert(
+      Utils.formatMessage(CONFIG.UI.MESSAGES.INFO_ITEMS_IMPORTED, { count: importedCount }),
+      'success'
+    );
+    
+    Utils.log(`見積明細取込完了: ${importedCount}行`);
   }
   
   // グローバルに公開
