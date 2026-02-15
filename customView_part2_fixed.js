@@ -207,29 +207,34 @@
     const resultsDiv = modal.querySelector('#itemSearchResults');
     
     // 検索実行
+    // 検索実行
     const performSearch = () => {
       const keyword = searchInput.value.trim();
-      if (!keyword) {
-        resultsDiv.innerHTML = '<p class="po-text-muted">検索キーワードを入力してください</p>';
-        return;
-      }
       
       resultsDiv.innerHTML = '<p class="po-text-muted">検索中...</p>';
       
-      const items = MasterData.getItems().filter(item => {
-        const code = Utils.getFieldValue(item, 'item_code').toLowerCase();
-        const name = Utils.getFieldValue(item, 'item_name').toLowerCase();
-        const kw = keyword.toLowerCase();
-        return code.includes(kw) || name.includes(kw);
-      });
+      // 全アイテム取得
+      let items = MasterData.getItems() || [];
+      
+      // キーワードが入力されている場合はフィルタリング
+      if (keyword) {
+        items = items.filter(item => {
+          const code = Utils.getFieldValue(item, 'item_code').toLowerCase();
+          const name = Utils.getFieldValue(item, 'item_name').toLowerCase();
+          const kw = keyword.toLowerCase();
+          return code.includes(kw) || name.includes(kw);
+        });
+      }
       
       if (items.length === 0) {
         resultsDiv.innerHTML = `<p class="po-text-muted">${CONFIG.UI.MESSAGES.ERROR_NO_RESULTS}</p>`;
         return;
       }
       
+      // 件数表示を追加
+      let html = `<p class="po-search-result-count" style="margin-bottom: 10px; font-weight: bold; color: #333;">${items.length} 件のアイテムが見つかりました</p>`;
       // 結果テーブル生成
-      let html = '<table class="po-table"><thead><tr><th>コード</th><th>名称</th><th>仕様</th><th>単価</th><th>単位</th><th>操作</th></tr></thead><tbody>';
+      html += '<table class="po-results-table"><thead><tr><th>コード</th><th>名称</th><th>仕様</th><th>単価</th><th>単位</th><th>操作</th></tr></thead><tbody>';
       items.forEach(item => {
         html += `
           <tr>
@@ -253,6 +258,7 @@
         `;
       });
       html += '</tbody></table>';
+      
       resultsDiv.innerHTML = html;
       
       // 選択ボタンのイベント設定
