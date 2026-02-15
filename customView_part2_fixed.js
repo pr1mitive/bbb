@@ -175,7 +175,7 @@
    * アイテム検索モーダルを開く
    * @param {HTMLElement} targetRow - 対象の明細行
    */
-  function openItemSearchModal(targetRow) {
+  window.openItemSearchModal = function(targetRow) {
     const modal = document.createElement('div');
     modal.className = 'po-modal-overlay';
     modal.innerHTML = `
