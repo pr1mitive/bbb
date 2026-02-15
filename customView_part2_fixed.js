@@ -207,69 +207,52 @@
     const resultsDiv = modal.querySelector('#itemSearchResults');
     
     // 検索実行
-    // 検索実行（修正版：空欄でも全件表示）
     const performSearch = () => {
       const keyword = searchInput.value.trim();
+      if (!keyword) {
+        resultsDiv.innerHTML = '<p class="po-text-muted">検索キーワードを入力してください</p>';
+        return;
+      }
       
       resultsDiv.innerHTML = '<p class="po-text-muted">検索中...</p>';
       
-      // キーワードが空の場合は全件、それ以外はフィルタ
-      let items = MasterData.items || [];
-      if (keyword) {
-        items = items.filter(item => {
-          const code = (item.code || '').toLowerCase();
-          const name = (item.name || '').toLowerCase();
-          const kw = keyword.toLowerCase();
-          return code.includes(kw) || name.includes(kw);
-        });
-      }
+      const items = MasterData.getItems().filter(item => {
+        const code = Utils.getFieldValue(item, 'item_code').toLowerCase();
+        const name = Utils.getFieldValue(item, 'item_name').toLowerCase();
+        const kw = keyword.toLowerCase();
+        return code.includes(kw) || name.includes(kw);
+      });
       
       if (items.length === 0) {
-        resultsDiv.innerHTML = `<p class="po-no-results">${CONFIG.UI.MESSAGES.ERROR_NO_RESULTS}</p>`;
+        resultsDiv.innerHTML = `<p class="po-text-muted">${CONFIG.UI.MESSAGES.ERROR_NO_RESULTS}</p>`;
         return;
       }
       
       // 結果テーブル生成
-      let html = '<div class="po-table-wrapper"><table class="po-table po-table-hover"><thead><tr>';
-      html += '<th style="width: 15%;">コード</th>';
-      html += '<th style="width: 25%;">名称</th>';
-      html += '<th style="width: 25%;">仕様</th>';
-      html += '<th style="width: 10%;" class="po-cell-right">単価</th>';
-      html += '<th style="width: 10%;">単位</th>';
-      html += '<th style="width: 15%;" class="po-cell-center">操作</th>';
-      html += '</tr></thead><tbody>';
-      
+      let html = '<table class="po-table"><thead><tr><th>コード</th><th>名称</th><th>仕様</th><th>単価</th><th>単位</th><th>操作</th></tr></thead><tbody>';
       items.forEach(item => {
-        const code = Utils.escapeHtml(item.code || '');
-        const name = Utils.escapeHtml(item.name || '');
-        const spec = Utils.escapeHtml(item.specification || '');
-        const price = item.standardPrice ? Number(item.standardPrice).toFixed(2) : '-';
-        const unit = Utils.escapeHtml(item.unit || '');
-        const isInventory = item.isInventory || CONFIG.INVENTORY_TYPES.NON_INVENTORY;
-        
         html += `
           <tr>
-            <td><strong>${code}</strong></td>
-            <td>${name}</td>
-            <td style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${spec}">${spec}</td>
-            <td class="po-cell-right">${price}</td>
-            <td>${unit}</td>
+            <td>${Utils.escapeHtml(Utils.getFieldValue(item, 'item_code'))}</td>
+            <td>${Utils.escapeHtml(Utils.getFieldValue(item, 'item_name'))}</td>
+            <td style="max-width: 200px; overflow: hidden; text-overflow: ellipsis;">${Utils.escapeHtml(Utils.getFieldValue(item, 'specification') || '')}</td>
+            <td class="po-cell-right">${Utils.getFieldValue(item, 'standard_price') ? Number(Utils.getFieldValue(item, 'standard_price')).toFixed(2) : '-'}</td>
+            <td>${Utils.escapeHtml(Utils.getFieldValue(item, 'unit') || '')}</td>
             <td class="po-cell-center">
               <button type="button" class="po-btn po-btn-sm po-btn-primary btn-select-item" 
-                      data-code="${code}"
-                      data-name="${name}"
-                      data-specification="${spec}"
-                      data-price="${item.standardPrice || ''}"
-                      data-unit="${unit}"
-                      data-is-inventory="${isInventory}">
+                      data-code="${Utils.escapeHtml(Utils.getFieldValue(item, 'item_code'))}"
+                      data-name="${Utils.escapeHtml(Utils.getFieldValue(item, 'item_name'))}"
+                      data-specification="${Utils.escapeHtml(Utils.getFieldValue(item, 'specification') || '')}"
+                      data-price="${Utils.getFieldValue(item, 'standard_price') || ''}"
+                      data-unit="${Utils.escapeHtml(Utils.getFieldValue(item, 'unit') || '')}"
+                      data-is-inventory="${Utils.getFieldValue(item, 'is_inventory') || CONFIG.INVENTORY_TYPES.NON_INVENTORY}">
                 ${CONFIG.UI.BUTTON_TEXT.SELECT}
               </button>
             </td>
           </tr>
         `;
       });
-      html += '</tbody></table></div>';
-      html += `<p class="po-text-muted" style="margin-top: 10px; text-align: right;">${items.length} 件のアイテムが見つかりました</p>`;
+      html += '</tbody></table>';
       resultsDiv.innerHTML = html;
       
       // 選択ボタンのイベント設定
@@ -295,11 +278,9 @@
       if (e.key === 'Enter') performSearch();
     });
     
-    // 初期表示（全件表示）
-    setTimeout(() => {
-      performSearch();
-      searchInput.focus();
-    }, 100);
+    // 初期表示(全件)
+    performSearch();
+    searchInput.focus();
   }
   
   /**
