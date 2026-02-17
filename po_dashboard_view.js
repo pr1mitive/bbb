@@ -4,9 +4,9 @@
  * 発注管理アプリ(748)に発注残一覧を表示し、
  * 入庫登録・入庫履歴の参照機能を提供
  * 
- * @version 1.1.0
+ * @version 1.2.0
  * @date 2026-02-17
- * @update 「発注残管理」一覧のみ表示、配置位置修正、ステータスロジック明確化
+ * @update 入庫登録時のステータスを「確定」に変更、UI間隔改善
  * @requires inventory_config_v2.0.1.js
  * @requires inventory_utils.js
  */
@@ -35,7 +35,7 @@
   const WAREHOUSE_MASTER_APP_ID = CONFIG.APP_IDS.WAREHOUSE_MASTER; // 747
   
   console.log('[PO_DASHBOARD] スクリプト読み込み完了', {
-    version: '1.1.0',
+    version: '1.2.0',
     poAppId: PO_APP_ID,
     transactionAppId: TRANSACTION_APP_ID
   });
@@ -659,7 +659,7 @@
           </div>
           
           <div class="form-section">
-            <h4>入庫情報（入力）</h4>
+            <h4>入庫情報（入力）※確定ステータスで登録されます</h4>
             <div class="form-row">
               <div class="form-group">
                 <label class="required">入庫日</label>
@@ -884,11 +884,11 @@
       submitBtn.disabled = true;
       submitBtn.textContent = '登録中...';
 
-      // 在庫取引レコードを作成
+      // 在庫取引レコードを作成（ステータス: 確定）
       const transactionRecord = {
         [CONFIG.FIELDS.TRANSACTION.TRANSACTION_DATE]: { value: receiveDate },
         [CONFIG.FIELDS.TRANSACTION.TRANSACTION_TYPE]: { value: '入庫' },
-        [CONFIG.FIELDS.TRANSACTION.STATUS]: { value: '予定' },
+        [CONFIG.FIELDS.TRANSACTION.STATUS]: { value: '確定' },  // 確定に変更
         [CONFIG.FIELDS.TRANSACTION.PO_NUMBER]: { value: poNumber },
         [CONFIG.FIELDS.TRANSACTION.ITEM_CODE]: { value: itemCode },
         [CONFIG.FIELDS.TRANSACTION.QUANTITY]: { value: quantity },
@@ -896,7 +896,8 @@
         [CONFIG.FIELDS.TRANSACTION.LOCATION]: { value: location },
         [CONFIG.FIELDS.TRANSACTION.UNIT_COST]: { value: unitCost },
         [CONFIG.FIELDS.TRANSACTION.AMOUNT]: { value: quantity * unitCost },
-        [CONFIG.FIELDS.TRANSACTION.REMARKS]: { value: remarks }
+        [CONFIG.FIELDS.TRANSACTION.REMARKS]: { value: remarks },
+        [CONFIG.FIELDS.TRANSACTION.PROCESSED_FLAG]: { value: ['処理済み'] }  // 処理済みフラグをON
       };
 
       console.log('[PO_DASHBOARD] 在庫取引レコード作成:', transactionRecord);
@@ -1174,7 +1175,7 @@
   // =====================================================
   
   window.PODashboard = {
-    VERSION: '1.1.0',
+    VERSION: '1.2.0',
     state: state,
     loadPOData: loadPOData,
     applyFilters: applyFilters,
@@ -1185,3 +1186,4 @@
   console.log('[PO_DASHBOARD] モジュール初期化完了');
 
 })();
+                         
