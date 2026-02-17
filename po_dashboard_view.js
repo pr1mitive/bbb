@@ -4,9 +4,9 @@
  * 発注管理アプリ(748)に発注残一覧を表示し、
  * 入庫登録・入庫履歴の参照機能を提供
  * 
- * @version 1.2.0
+ * @version 1.2.1
  * @date 2026-02-17
- * @update 入庫登録時のステータスを「確定」に変更、UI間隔改善
+  * @update UI間隔をさらに改善、processed_flag削除
  * @requires inventory_config_v2.0.1.js
  * @requires inventory_utils.js
  */
@@ -896,8 +896,7 @@
         [CONFIG.FIELDS.TRANSACTION.LOCATION]: { value: location },
         [CONFIG.FIELDS.TRANSACTION.UNIT_COST]: { value: unitCost },
         [CONFIG.FIELDS.TRANSACTION.AMOUNT]: { value: quantity * unitCost },
-        [CONFIG.FIELDS.TRANSACTION.REMARKS]: { value: remarks },
-        [CONFIG.FIELDS.TRANSACTION.PROCESSED_FLAG]: { value: ['処理済み'] }  // 処理済みフラグをON
+        [CONFIG.FIELDS.TRANSACTION.REMARKS]: { value: remarks }
       };
 
       console.log('[PO_DASHBOARD] 在庫取引レコード作成:', transactionRecord);
@@ -1175,7 +1174,7 @@
   // =====================================================
   
   window.PODashboard = {
-    VERSION: '1.2.0',
+    VERSION: '1.2.1',
     state: state,
     loadPOData: loadPOData,
     applyFilters: applyFilters,
@@ -1186,3 +1185,4 @@
   console.log('[PO_DASHBOARD] モジュール初期化完了');
 
 })();
+                                                                                                                
