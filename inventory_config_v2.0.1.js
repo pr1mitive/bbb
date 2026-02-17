@@ -3,9 +3,9 @@
  * 
  * App ID、フィールド名、定数などを一元管理
  * 
- * @version 2.0.4
+ * @version 2.0.5
  * @date 2026-02-15
- * @update 発注明細テーブル対応
+ * @update 発注書番号フィールド追加
  */
 
 (function(PLUGIN_ID) {
@@ -172,6 +172,7 @@
   const PO_FIELDS = {
     // ヘッダー情報
     PO_NUMBER: 'po_number',
+    PO_DATE_FILE: 'po_date_file',  // 発注書用発注番号（文字列）
     ORDER_DATE: 'order_date',
     SUPPLIER: 'supplier',
     
