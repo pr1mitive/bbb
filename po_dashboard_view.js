@@ -660,38 +660,44 @@
           
           <div class="form-section">
             <h4>入庫情報（入力）※確定ステータスで登録されます</h4>
-            <div class="form-row">
-              <div class="form-group">
+            <div class="form-row-single">
+              <div class="form-group full-width">
                 <label class="required">入庫日</label>
                 <input type="date" id="receive-date" value="${today}" required>
               </div>
-              <div class="form-group">
+            </div>
+            <div class="form-row-single">
+              <div class="form-group full-width">
                 <label class="required">入庫数</label>
                 <input type="number" id="receive-quantity" min="0.01" max="${remainingQty}" 
                        step="0.01" placeholder="入庫数を入力" required>
                 <small class="field-hint">最大: ${formatNumber(remainingQty)}</small>
               </div>
             </div>
-            <div class="form-row">
-              <div class="form-group">
+            <div class="form-row-single">
+              <div class="form-group full-width">
                 <label class="required">倉庫</label>
                 <select id="receive-warehouse" required>
                   <option value="">倉庫を選択...</option>
                 </select>
               </div>
-              <div class="form-group">
+            </div>
+            <div class="form-row-single">
+              <div class="form-group full-width">
                 <label class="required">ロケーション</label>
                 <input type="text" id="receive-location" placeholder="倉庫選択後に自動入力" readonly>
                 <small class="field-hint">倉庫マスタからルックアップ</small>
               </div>
             </div>
-            <div class="form-row">
-              <div class="form-group">
+            <div class="form-row-single">
+              <div class="form-group full-width">
                 <label class="required">単価</label>
                 <input type="number" id="receive-unit-cost" min="0" step="0.01" 
                        value="${unitPrice}" placeholder="単価を入力" required>
               </div>
-              <div class="form-group">
+            </div>
+            <div class="form-row-single">
+              <div class="form-group full-width">
                 <label>金額（自動計算）</label>
                 <input type="text" id="receive-amount" value="0" readonly>
               </div>
@@ -1185,4 +1191,3 @@
   console.log('[PO_DASHBOARD] モジュール初期化完了');
 
 })();
-                                                                                                                

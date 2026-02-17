@@ -36,7 +36,7 @@
   border: none;
   border-radius: 6px;
   cursor: pointer;
-  font-size: 14px;
+  font-size: 15px;
   transition: background 0.3s;
 }
 
@@ -90,7 +90,7 @@
 }
 
 .card-label {
-  font-size: 14px;
+  font-size: 15px;
   color: #666;
 }
 
@@ -148,7 +148,7 @@
   padding: 8px 12px;
   border: 1px solid #ddd;
   border-radius: 4px;
-  font-size: 14px;
+  font-size: 15px;
   transition: border-color 0.3s;
 }
 
@@ -164,7 +164,7 @@
   border: none;
   border-radius: 6px;
   cursor: pointer;
-  font-size: 14px;
+  font-size: 15px;
   transition: background 0.3s;
 }
 
@@ -200,7 +200,7 @@
 .po-table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 14px;
+  font-size: 15px;
 }
 
 .po-table thead {
@@ -402,7 +402,7 @@
 }
 
 .modal-body {
-  padding: 30px 40px;  /* 25px 30px から 30px 40px に変更 */
+  padding: 40px 50px;  /* 25px 30px から 30px 40px に変更 */
   overflow-y: auto;
   flex: 1;
 }
@@ -434,6 +434,18 @@
   margin-bottom: 25px;  /* 20px から 25px に増加 */
 }
 
+/* 1カラムレイアウト用のスタイル（入庫登録モーダル用） */
+.form-row-single {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 30px;  /* 各フィールド間に十分な余白 */
+}
+
+.form-row-single .form-group.full-width {
+  width: 100%;
+}
+
+
 .form-group {
   flex: 1;
 }
@@ -461,10 +473,10 @@
 .form-group select,
 .form-group textarea {
   width: 100%;
-  padding: 12px 16px;  /* 10px 14px から 12px 16px に変更 */
+  padding: 14px 18px;  /* 10px 14px から 12px 16px に変更 */
   border: 1px solid #ddd;
   border-radius: 4px;
-  font-size: 14px;
+  font-size: 15px;
   transition: border-color 0.3s;
 }
 
@@ -505,7 +517,7 @@
   border: 1px solid #ffc107;
   border-radius: 6px;
   color: #856404;
-  font-size: 14px;
+  font-size: 15px;
   margin-top: 15px;
 }
 
@@ -516,7 +528,7 @@
   border: none;
   border-radius: 6px;
   cursor: pointer;
-  font-size: 14px;
+  font-size: 15px;
   transition: background 0.3s;
 }
 
@@ -609,7 +621,7 @@
 .history-table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 14px;
+  font-size: 15px;
 }
 
 .history-table th {
