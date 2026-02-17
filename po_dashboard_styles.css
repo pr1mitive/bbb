@@ -296,6 +296,12 @@
   color: #fd7e14;
 }
 
+/* テキストスタイル */
+.text-muted {
+  color: #999;
+  font-size: 12px;
+}
+
 /* 操作ボタン */
 .btn-receive,
 .btn-history {

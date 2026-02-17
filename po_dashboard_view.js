@@ -4,8 +4,9 @@
  * 発注管理アプリ(748)に発注残一覧を表示し、
  * 入庫登録・入庫履歴の参照機能を提供
  * 
- * @version 1.0.0
- * @date 2026-02-15
+ * @version 1.1.0
+ * @date 2026-02-17
+ * @update 「発注残管理」一覧のみ表示、配置位置修正、ステータスロジック明確化
  * @requires inventory_config_v2.0.1.js
  * @requires inventory_utils.js
  */
@@ -34,7 +35,7 @@
   const WAREHOUSE_MASTER_APP_ID = CONFIG.APP_IDS.WAREHOUSE_MASTER; // 747
   
   console.log('[PO_DASHBOARD] スクリプト読み込み完了', {
-    version: '1.0.0',
+    version: '1.1.0',
     poAppId: PO_APP_ID,
     transactionAppId: TRANSACTION_APP_ID
   });
@@ -61,9 +62,17 @@
   
   /**
    * 発注管理アプリの一覧画面でダッシュボードを表示
+   * ※「発注残管理」一覧のみで表示
    */
   kintone.events.on('app.record.index.show', async (event) => {
     if (event.appId !== PO_APP_ID) return event;
+
+    // 「発注残管理」一覧のみで表示
+    const viewName = event.viewName || event.viewId;
+    if (viewName !== '発注残管理') {
+      console.log('[PO_DASHBOARD] 一覧「' + viewName + '」ではダッシュボードを表示しません');
+      return event;
+    }
 
     try {
       console.log('[PO_DASHBOARD] ダッシュボード表示開始');
@@ -98,11 +107,13 @@
   
   /**
    * ダッシュボードコンテナを作成
+   * ※kintoneの一覧上部スペースに表示
    */
   function createDashboardContainer() {
-    const header = kintone.app.getHeaderMenuSpaceElement();
-    if (!header) {
-      console.error('[PO_DASHBOARD] ヘッダー領域が取得できません');
+    // 一覧上部スペースを取得（標準一覧と重ならない）
+    const spaceElement = kintone.app.getHeaderSpaceElement();
+    if (!spaceElement) {
+      console.error('[PO_DASHBOARD] 上部スペース領域が取得できません');
       return;
     }
 
@@ -132,7 +143,7 @@
       </div>
     `;
     
-    header.appendChild(container);
+    spaceElement.appendChild(container);
 
     // 更新ボタンのイベント
     document.getElementById('btn-refresh-dashboard').addEventListener('click', async () => {
@@ -189,6 +200,14 @@
 
   /**
    * 統計データを計算
+   * 
+   * ステータス判定ロジック：
+   * - 「未納品」: 発注残数 = 発注数、納品済数 = 0
+   * - 「一部納品」: 0 < 納品済数 < 発注数、発注残数 > 0
+   * - 「完納」: 納品済数 = 発注数、発注残数 = 0
+   * - 「納品遅延」: 未納品or一部納品 かつ 納品予定日 < 今日
+   * 
+   * ※ステータスはpo_integration_v2.jsが入庫レコード作成時に自動更新します
    */
   function calculateStats() {
     const now = new Date();
@@ -433,7 +452,7 @@
                         data-item-code="${itemCode}" data-row-index="${index}">
                   入庫登録
                 </button>
-              ` : ''}
+              ` : '<span class="text-muted">完納済</span>'}
               <button type="button" class="btn-history" data-po-number="${poNumber}" 
                       data-item-code="${itemCode}">
                 履歴
@@ -1155,7 +1174,7 @@
   // =====================================================
   
   window.PODashboard = {
-    VERSION: '1.0.0',
+    VERSION: '1.1.0',
     state: state,
     loadPOData: loadPOData,
     applyFilters: applyFilters,
